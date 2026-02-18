@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:14-alpine
+    container_name: ethcare-postgres
+    environment:
+      POSTGRES_USER: ethcare
+      POSTGRES_PASSWORD: ethcare_dev_password
+      POSTGRES_DB: ethcare_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ethcare"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    container_name: ethcare-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # IPFS (optional - can use Infura instead)
+  ipfs:
+    image: ipfs/go-ipfs:latest
+    container_name: ethcare-ipfs
+    ports:
+      - "4001:4001"  # Swarm
+      - "5001:5001"  # API
+      - "8080:8080"  # Gateway
+    volumes:
+      - ipfs_data:/data/ipfs
+    environment:
+      - IPFS_PROFILE=server
+
+  # Backend API
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ethcare-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: ethcare
+      DATABASE_PASSWORD: ethcare_dev_password
+      DATABASE_NAME: ethcare_db
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      IPFS_HOST: ipfs
+      IPFS_PORT: 5001
+      IPFS_PROTOCOL: http
+    volumes:
+      - ./src:/app/src
+      - ./logs:/app/logs
+    command: npm run start:dev
+
+volumes:
+  postgres_data:
+  redis_data:
+  ipfs_data:

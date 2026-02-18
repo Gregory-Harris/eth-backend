@@ -1,0 +1,29 @@
+[
+  {
+    "type": "constructor",
+    "inputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "addAccount",
+    "inputs": [
+      {"name": "ownerAddress", "type": "address"},
+      {"name": "profile", "type": "bytes32"}
+    ],
+    "outputs": [{"name": "success", "type": "bool"}],
+    "stateMutability": "nonpayable"
+  }
+]
+
+// TODO: Replace this with the actual ABI from your compiled contract
+// 
+// To get the ABI:
+// 1. After deploying EthCareOptimized, go to:
+//    hardhat-project/artifacts/contracts/EthCareOptimized.sol/EthCareOptimized.json
+// 
+// 2. Copy the "abi" array from that file
+// 
+// 3. Replace the contents of this file with that ABI array
+//
+// The ABI contains all function signatures, events, and errors from your contract
